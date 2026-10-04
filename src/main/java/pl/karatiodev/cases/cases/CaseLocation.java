@@ -1,5 +1,6 @@
 package pl.karatiodev.cases.cases;
 
+import eu.okaeri.configs.OkaeriConfig;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import org.bukkit.Location;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CaseLocation {
+public class CaseLocation extends OkaeriConfig {
 
     private String world;
 

@@ -1,5 +1,6 @@
 package pl.karatiodev.cases.cases;
 
+import eu.okaeri.configs.OkaeriConfig;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CaseReward {
+public class CaseReward extends OkaeriConfig {
 
     private ItemStack item;
     private double chance = 1.0D;

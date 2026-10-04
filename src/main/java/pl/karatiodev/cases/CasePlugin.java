@@ -1,11 +1,13 @@
 package pl.karatiodev.cases;
 
 import dev.rollczi.litecommands.LiteCommands;
+import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import pl.karatiodev.cases.commands.CaseCommand;
 import pl.karatiodev.cases.config.Configs;
 import pl.karatiodev.cases.listeners.CaseInventoryListener;
 import pl.karatiodev.cases.listeners.UpdateListener;
@@ -46,6 +48,12 @@ public class CasePlugin extends JavaPlugin {
         updateChecker.checkForUpdates();
 
         this.registerListeners();
+
+        this.liteCommands = LiteBukkitFactory
+                .builder("karatiocase")
+                .commands(
+                        new CaseCommand(this)
+                ).build();
 
         getLogger().info("KaratioCase enabled. Loaded " + caseManager.getCases().size() + " cases.");
     }
