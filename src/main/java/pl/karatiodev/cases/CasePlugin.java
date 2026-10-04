@@ -2,9 +2,12 @@ package pl.karatiodev.cases;
 
 import dev.rollczi.litecommands.LiteCommands;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.karatiodev.cases.config.Configs;
+import pl.karatiodev.cases.listeners.UpdateListener;
 import pl.karatiodev.cases.manager.CaseManager;
 
 public class CasePlugin extends JavaPlugin {
@@ -20,6 +23,9 @@ public class CasePlugin extends JavaPlugin {
     @Getter
     private CaseManager caseManager;
 
+    @Getter
+    private UpdateChecker updateChecker;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -27,6 +33,11 @@ public class CasePlugin extends JavaPlugin {
         this.configs = new Configs(this);
 
         this.caseManager = new CaseManager(this);
+        this.updateChecker = new UpdateChecker(this);
+
+        updateChecker.checkForUpdates();
+
+        this.registerListeners();
 
         getLogger().info("KaratioCase enabled. Loaded " + caseManager.getCases().size() + " cases.");
     }
@@ -37,5 +48,11 @@ public class CasePlugin extends JavaPlugin {
         if(caseManager != null) caseManager.save();
 
         instance = null;
+    }
+
+    private void registerListeners(){
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
+        pluginManager.registerEvents(new UpdateListener(this), this);
     }
 }
