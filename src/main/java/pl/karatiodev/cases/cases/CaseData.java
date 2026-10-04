@@ -16,5 +16,5 @@ public class CaseData {
     private Material blockType = Material.ENDER_CHEST;
     private CaseLocation location = new CaseLocation();
     private CaseKey key = new CaseKey();
-    private List<ItemStack> rewards = new ArrayList<>();
+    private List<CaseReward> rewards = new ArrayList<>();
 }
