@@ -7,7 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.karatiodev.cases.config.Configs;
+import pl.karatiodev.cases.listeners.CaseInventoryListener;
 import pl.karatiodev.cases.listeners.UpdateListener;
+import pl.karatiodev.cases.manager.AnimationManager;
 import pl.karatiodev.cases.manager.CaseManager;
 
 public class CasePlugin extends JavaPlugin {
@@ -24,6 +26,9 @@ public class CasePlugin extends JavaPlugin {
     private CaseManager caseManager;
 
     @Getter
+    private AnimationManager animationManager;
+
+    @Getter
     private UpdateChecker updateChecker;
 
     @Override
@@ -33,8 +38,11 @@ public class CasePlugin extends JavaPlugin {
         this.configs = new Configs(this);
 
         this.caseManager = new CaseManager(this);
-        this.updateChecker = new UpdateChecker(this);
+        this.caseManager.load();
 
+        this.animationManager = new AnimationManager(this);
+
+        this.updateChecker = new UpdateChecker(this);
         updateChecker.checkForUpdates();
 
         this.registerListeners();
@@ -54,5 +62,6 @@ public class CasePlugin extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
         pluginManager.registerEvents(new UpdateListener(this), this);
+        pluginManager.registerEvents(new CaseInventoryListener(this), this);
     }
 }
