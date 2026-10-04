@@ -13,4 +13,5 @@ public class MessagesConfig extends OkaeriConfig {
     private String caseDeleted = "<green>Case with ID <yellow>%id%</yellow> deleted.";
     private String positionCantChanged = "<red>Failed to change the case position.";
     private String positionChanged = "<green>Case position with ID <yellow>%id%</yellow> changed.";
+    private String noChests = "<red>No configured chests.";
 }

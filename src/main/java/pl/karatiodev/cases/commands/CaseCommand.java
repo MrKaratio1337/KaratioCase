@@ -80,4 +80,22 @@ public class CaseCommand {
         plugin.getCaseManager().move(id, player.getLocation());
         player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getPositionChanged().replace("%id%", caseData.getId())));
     }
+
+    @Execute(name = "list")
+    public void list(@Sender CommandSender sender){
+        if(plugin.getCaseManager().getCases().isEmpty()){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getNoChests()));
+            return;
+        }
+
+        sender.sendMessage(MessageUtility.deserialize("<gold>Configured cases:"));
+        plugin.getCaseManager().getCases().forEach(caseData -> {
+            sender.sendMessage(MessageUtility.deserialize("<gray>- <yellow>" + caseData.getId() + " <dark_gray>(" + caseData.getRewards().size() + " rewards)"));
+        });
+    }
+
+    @Execute(name = "info")
+    public void info(@Sender CommandSender sender, @Arg String id){
+        CaseData caseData = plugin.getCaseManager().get(id);
+    }
 }
