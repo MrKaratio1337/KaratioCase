@@ -1,9 +1,10 @@
 package pl.karatiodev.cases.config.section;
 
+import eu.okaeri.configs.OkaeriConfig;
 import lombok.Getter;
 
 @Getter
-public class AnimationSection {
+public class AnimationSection extends OkaeriConfig {
 
     private boolean enabled = true;
     private int steps = 20;
