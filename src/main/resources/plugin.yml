@@ -1,0 +1,4 @@
+main: pl.karatiodev.cases.CasePlugin
+name: KaratioCase
+version: 1.0-BETA
+author: MrKaratio1337
