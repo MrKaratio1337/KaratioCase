@@ -19,6 +19,7 @@
         <okaeri.version>5.0.13</okaeri.version>
         <adventure.version>4.20.0</adventure.version>
         <lombok.version>1.18.36</lombok.version>
+        <java.version>21</java.version>
     </properties>
 
     <repositories>
@@ -79,7 +80,7 @@
     </dependencies>
 
     <build>
-        <finalName>KaratioCombat</finalName>
+        <finalName>KaratioCase</finalName>
 
         <plugins>
             <plugin>
