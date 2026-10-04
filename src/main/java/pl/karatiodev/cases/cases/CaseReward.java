@@ -14,4 +14,8 @@ public class CaseReward {
 
     private ItemStack item;
     private double chance = 1.0D;
+
+    public ItemStack getItemClone(){
+        return item == null ? null : item.clone();
+    }
 }

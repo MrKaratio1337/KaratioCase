@@ -12,7 +12,8 @@ import java.util.List;
 @Setter
 public class CaseData {
 
-    private String id, displayName;
+    private String id;
+    private String displayName = "<gold>Case";
     private Material blockType = Material.ENDER_CHEST;
     private CaseLocation location = new CaseLocation();
     private CaseKey key = new CaseKey();
