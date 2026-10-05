@@ -18,4 +18,7 @@ public class MessagesConfig extends OkaeriConfig {
     private String cantCreateKey = "<red>Failed to create the key.";
     private String keyGived = "<green>Transferred <yellow>%amount%</yellow> for keys <yellow>%id%</yellow> to <yellow>%player%</yellow>";
     private String configReload = "<green>Configuration reloaded.";
+    private String animationRunning = "<red>Animation is running";
+    private String caseEmpty = "<red>That case is empty";
+    private String noKey = "<red>You do not have key";
 }

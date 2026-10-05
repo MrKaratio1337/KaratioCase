@@ -60,6 +60,7 @@ public class CasePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if(animationManager != null) animationManager.shutdown();
         if(liteCommands != null) liteCommands.unregister();
         if(caseManager != null) caseManager.save();
 
