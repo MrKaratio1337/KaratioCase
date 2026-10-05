@@ -9,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.Area;
 import pl.karatiodev.cases.CasePlugin;
 import pl.karatiodev.cases.cases.CaseData;
 import pl.karatiodev.cases.utilities.MessageUtility;
+
+import java.util.Map;
 
 @Command(name = "case", aliases = {"cases", "karatiocase"})
 @Permission("karatiocase.admin")
@@ -109,5 +112,78 @@ public class CaseCommand {
         sender.sendMessage(MessageUtility.deserialize("<gray>Block <yellow>" + caseData.getBlockType()));
         sender.sendMessage(MessageUtility.deserialize("<gray>World <yellow>" + caseData.getLocation().getWorld()));
         sender.sendMessage(MessageUtility.deserialize("<gray>Rewards size <yellow>" + caseData.getRewards().size()));
+    }
+
+    @Execute(name = "givekey")
+    public void giveKey(@Sender CommandSender sender, @Arg String id){
+        if(!(sender instanceof Player player)){
+            sender.sendMessage(MessageUtility.deserialize("<red>That subcommand must be used by player"));
+            return;
+        }
+
+        giveKey(player, player, id, 1);
+    }
+
+    @Execute(name = "givekey")
+    public void giveKey(@Sender Player sender, @Arg String id, @Arg int amount){
+        giveKey(sender, sender, id, amount);
+    }
+
+    @Execute(name = "edit")
+    public void edit(@Sender Player player, @Arg String id){
+        CaseData caseData = plugin.getCaseManager().get(id);
+        if(caseData == null){
+            player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseNotFound()));
+            return;
+        }
+
+        // todo: editing
+    }
+
+    @Execute(name = "reload")
+    public void reload(@Sender CommandSender sender){
+        plugin.getConfigs().reload(plugin);
+        plugin.getCaseManager().load();
+
+        sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getConfigReload()));
+    }
+
+    private void giveKey(CommandSender sender, Player target, String id, int amount){
+        CaseData caseData = plugin.getCaseManager().get(id);
+        if(caseData == null){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseNotFound()));
+            return;
+        }
+
+        if(amount < 1 || amount > 2304){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getOutOfBound()));
+            return;
+        }
+
+        ItemStack key = plugin.getCaseManager().createKey(id);
+        if(key == null){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCantCreateKey()));
+            return;
+        }
+
+        giveItems(target, key, amount);
+        sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getKeyGived().replace("%amount%", String.valueOf(amount)).replace("%id%", id).replace("%player%", target.getName())));
+    }
+
+    private void giveItems(Player player, ItemStack item, int amount){
+        int maxStack = item.getMaxStackSize();
+        int remaining = amount;
+
+        while(remaining > 0){
+            int currentAmount = Math.min(remaining, maxStack);
+
+            ItemStack clone = item.clone();
+            clone.setAmount(currentAmount);
+
+            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(clone);
+            leftovers.values().forEach(leftover -> player.getWorld().dropItemNaturally(player.getLocation(), leftover));
+
+            remaining -= currentAmount;
+        }
     }
 }
