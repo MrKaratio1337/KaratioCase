@@ -97,5 +97,17 @@ public class CaseCommand {
     @Execute(name = "info")
     public void info(@Sender CommandSender sender, @Arg String id){
         CaseData caseData = plugin.getCaseManager().get(id);
+
+        if(caseData == null){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseNotFound().replace("%id%", id)));
+            return;
+        }
+
+        sender.sendMessage(MessageUtility.deserialize("<gold>Case information:"));
+        sender.sendMessage(MessageUtility.deserialize("<gray>ID <yellow>" + caseData.getId()));
+        sender.sendMessage(MessageUtility.deserialize("<gray>Name <yellow>" + caseData.getDisplayName()));
+        sender.sendMessage(MessageUtility.deserialize("<gray>Block <yellow>" + caseData.getBlockType()));
+        sender.sendMessage(MessageUtility.deserialize("<gray>World <yellow>" + caseData.getLocation().getWorld()));
+        sender.sendMessage(MessageUtility.deserialize("<gray>Rewards size <yellow>" + caseData.getRewards().size()));
     }
 }
