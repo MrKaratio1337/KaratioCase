@@ -12,10 +12,13 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import pl.karatiodev.cases.CasePlugin;
 import pl.karatiodev.cases.cases.CaseData;
 import pl.karatiodev.cases.cases.CaseReward;
 import pl.karatiodev.cases.inventories.AnimationHolder;
+import pl.karatiodev.cases.inventories.CaseEditorHolder;
 import pl.karatiodev.cases.inventories.PreviewHolder;
 import pl.karatiodev.cases.inventories.PreviewInventory;
 import pl.karatiodev.cases.utilities.MessageUtility;
@@ -61,9 +64,91 @@ public class CaseInventoryListener implements Listener {
             return;
         }
 
+        if(event.getView().getTopInventory().getHolder() instanceof CaseEditorHolder editorHolder){
+            handleEditorClick(event, player);
+        }
+
         if(event.getView().getTopInventory().getHolder() instanceof PreviewHolder previewHolder) {
             handlePreviewClick(event, player, previewHolder.getCaseData());
         }
+    }
+
+    private void handleEditorClick(InventoryClickEvent event, Player player){
+        if(event.getClick() == ClickType.DOUBLE_CLICK
+                || event.getClick() == ClickType.NUMBER_KEY
+                || event.getClick() == ClickType.SHIFT_LEFT
+                || event.getClick() == ClickType.SHIFT_RIGHT
+                || event.getClick() == ClickType.SWAP_OFFHAND
+                || event.getClick() == ClickType.CONTROL_DROP
+                || event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY
+                || event.getAction() == InventoryAction.HOTBAR_SWAP
+                || event.getAction() == InventoryAction.COLLECT_TO_CURSOR){
+            event.setCancelled(true);
+            return;
+        }
+
+        int slot = event.getRawSlot();
+
+        if(slot < 0) return;
+        if(slot >= event.getView().getTopInventory().getSize()) return;
+
+        if(slot == 45){
+            event.setCancelled(true);
+
+            boolean saved = plugin.getCaseEditorManager().save(player, event.getView().getTopInventory());
+            if(!saved) return;
+
+            player.closeInventory();
+            player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getRewardSaved()));
+            return;
+        }
+
+        if(slot == 49){
+            event.setCancelled(true);
+
+            cancelEditor(player, event.getView().getTopInventory());
+            return;
+        }
+
+        if(slot == 53){
+            event.setCancelled(true);
+
+            clearEditorRewards(event.getView().getTopInventory());
+            return;
+        }
+
+        if (!isRewardSlot(slot)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void clearEditorRewards(Inventory inventory){
+        int[] slots = {
+                10, 11, 12, 13, 14, 15, 16,
+                19, 20, 21, 22, 23, 24, 25,
+                28, 29, 30, 31, 32, 33, 34
+        };
+
+        for(int slot : slots){
+            inventory.setItem(slot, null);
+        }
+    }
+
+    private boolean isRewardSlot(int slot){
+        return switch (slot){
+            case 10, 11, 12, 13, 14, 15, 16,
+                 19, 20, 21, 22, 23, 24, 25,
+                 28, 29, 30, 31, 32, 33, 34 -> true;
+            default -> false;
+        };
+    }
+
+    private void cancelEditor(Player player, Inventory inventory){
+        plugin.getCaseEditorManager().remove(player);
+
+        player.closeInventory();
+
+        player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getChangesCancelled()));
     }
 
     private void handleAnimationClick(InventoryClickEvent event){
@@ -119,12 +204,24 @@ public class CaseInventoryListener implements Listener {
         || event.getView().getTopInventory().getHolder() instanceof AnimationHolder){
             event.setCancelled(true);
         }
+
+        if(event.getView().getTopInventory().getHolder() instanceof CaseEditorHolder){
+            for(int rawSlot : event.getRawSlots()){
+                if(rawSlot >= event.getView().getTopInventory().getSize()) continue;
+
+                if(!isRewardSlot(rawSlot)){
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onInventoryCreative(InventoryCreativeEvent event){
         if(event.getView().getTopInventory().getHolder() instanceof PreviewHolder
-                || event.getView().getTopInventory().getHolder() instanceof AnimationHolder){
+                || event.getView().getTopInventory().getHolder() instanceof AnimationHolder
+        || event.getView().getTopInventory().getHolder() instanceof CaseEditorHolder){
             event.setCancelled(true);
         }
     }
@@ -136,6 +233,26 @@ public class CaseInventoryListener implements Listener {
 
         if(event.getDestination().getHolder() instanceof PreviewHolder
                 || event.getSource().getHolder() instanceof PreviewHolder) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onEditorClose(InventoryCloseEvent event){
+        if(!(event.getPlayer() instanceof Player player)) return;
+        if(!(event.getInventory().getHolder() instanceof CaseEditorHolder)) return;
+        if(!plugin.getCaseEditorManager().isEditing(player)) return;
+
+        var items = plugin.getCaseEditorManager().getEditorItems(event.getInventory());
+        plugin.getCaseEditorManager().remove(player);
+
+        for(ItemStack item : items){
+            if(item == null || item.getType().isAir())continue;
+
+            var leftovers = player.getInventory().addItem(item);
+
+            for(ItemStack leftover : leftovers.values()){
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -161,6 +278,8 @@ public class CaseInventoryListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event){
         plugin.getAnimationManager().handleQuit(event.getPlayer());
+
+        if(plugin.getCaseEditorManager().isEditing(event.getPlayer())) plugin.getCaseEditorManager().remove(event.getPlayer());
     }
 
     @EventHandler

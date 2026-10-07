@@ -1,0 +1,120 @@
+package pl.karatiodev.cases.inventories;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import pl.karatiodev.cases.CasePlugin;
+import pl.karatiodev.cases.cases.CaseData;
+import pl.karatiodev.cases.cases.CaseReward;
+import pl.karatiodev.cases.utilities.MessageUtility;
+
+import java.util.function.Consumer;
+
+public class CaseEditorInventory {
+
+    public static void open(Player player, CaseData caseData){
+        CasePlugin plugin = CasePlugin.getInstance();
+
+        var config = plugin.getConfigs().getPluginConfig().getGui();
+
+        int size = normalizeSize(config.getPreviewSize());
+        String title = config.getEditingTitle();
+
+        CaseEditorHolder holder = new CaseEditorHolder(caseData);
+        Inventory inventory = Bukkit.createInventory(holder, size, MessageUtility.deserialize(title));
+        holder.setInventory(inventory);
+
+        fillBackground(inventory);
+
+        plugin.getCaseManager().getRewardManager().getValidRewards(caseData).stream().limit(21).forEach(new RewardPlacer(inventory, plugin));
+
+        inventory.setItem(45, createButton(Material.LIME_WOOL, "<green>Save"));
+        inventory.setItem(49, createButton(Material.RED_WOOL, "<red>Cancel"));
+        inventory.setItem(53, createButton(Material.BARRIER, "<red>Clear rewards"));
+
+        player.openInventory(inventory);
+
+        plugin.getCaseEditorManager().start(player, caseData);
+    }
+
+    private static void fillBackground(Inventory inventory){
+        ItemStack filler = createFiller();
+
+        for(int i = 0; i < inventory.getSize(); i++){
+            inventory.setItem(i, filler.clone());
+        }
+
+        int[] slots = {
+                10, 11, 12, 13, 14, 15, 16,
+                19, 20, 21, 22, 23, 24, 25,
+                28, 29, 30, 31, 32, 33, 34
+        };
+
+        for(int slot : slots){
+            inventory.setItem(slot, null);
+        }
+    }
+
+    private static ItemStack createFiller(){
+        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if(meta == null) return item;
+
+        meta.displayName(MessageUtility.deserialize("<gray>"));
+
+        item.setItemMeta(meta);
+
+        return item;
+    }
+
+    private static ItemStack createButton(Material material, String name){
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if(meta == null) return item;
+
+        meta.displayName(MessageUtility.deserialize(name));
+
+        item.setItemMeta(meta);
+
+        return item;
+    }
+
+    private static int normalizeSize(int size) {
+        if(size < 54) return 54;
+        if(size > 54) return 54;
+
+        return size;
+    }
+
+    private static class RewardPlacer implements Consumer<CaseReward> {
+        private final Inventory inventory;
+        private final CasePlugin plugin;
+
+        private int index;
+
+        private final int[] slots = {
+                10, 11, 12, 13, 14, 15, 16,
+                19, 20, 21, 22, 23, 24, 25,
+                28, 29, 30, 31, 32, 33, 34
+        };
+
+        private RewardPlacer(Inventory inventory, CasePlugin plugin){
+            this.inventory = inventory;
+            this.plugin = plugin;
+        }
+
+        @Override
+        public void accept(CaseReward reward) {
+            if(index >= slots.length) return;
+
+            if(reward == null || reward.getItem() == null || reward.getItem().getType().isAir()) return;
+
+            inventory.setItem(slots[index], reward.getItem().clone());
+
+            index ++;
+        }
+    }
+}

@@ -21,4 +21,7 @@ public class MessagesConfig extends OkaeriConfig {
     private String animationRunning = "<red>Animation is running";
     private String caseEmpty = "<red>That case is empty";
     private String noKey = "<red>You do not have key";
+    private String rewardSaved = "<green>Rewards saved.";
+    private String changesCancelled = "<red>Changes cancelled.";
+    private String editing = "<red>You are now in editing session";
 }

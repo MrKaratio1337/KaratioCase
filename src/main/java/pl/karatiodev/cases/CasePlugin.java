@@ -12,6 +12,7 @@ import pl.karatiodev.cases.config.Configs;
 import pl.karatiodev.cases.listeners.CaseInventoryListener;
 import pl.karatiodev.cases.listeners.UpdateListener;
 import pl.karatiodev.cases.manager.AnimationManager;
+import pl.karatiodev.cases.manager.CaseEditorManager;
 import pl.karatiodev.cases.manager.CaseManager;
 
 public class CasePlugin extends JavaPlugin {
@@ -31,6 +32,9 @@ public class CasePlugin extends JavaPlugin {
     private AnimationManager animationManager;
 
     @Getter
+    private CaseEditorManager caseEditorManager;
+
+    @Getter
     private UpdateChecker updateChecker;
 
     @Override
@@ -43,6 +47,7 @@ public class CasePlugin extends JavaPlugin {
         this.caseManager.load();
 
         this.animationManager = new AnimationManager(this);
+        this.caseEditorManager = new CaseEditorManager(this);
 
         this.updateChecker = new UpdateChecker(this);
         updateChecker.checkForUpdates();

@@ -14,6 +14,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.checkerframework.checker.units.qual.Area;
 import pl.karatiodev.cases.CasePlugin;
 import pl.karatiodev.cases.cases.CaseData;
+import pl.karatiodev.cases.inventories.CaseEditorInventory;
 import pl.karatiodev.cases.utilities.MessageUtility;
 
 import java.util.Map;
@@ -137,7 +138,17 @@ public class CaseCommand {
             return;
         }
 
-        // todo: editing
+        if(plugin.getAnimationManager().isRunning(player)){
+            player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getAnimationRunning()));
+            return;
+        }
+
+        if(plugin.getCaseEditorManager().isEditing(player)){
+            player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getEditing()));
+            return;
+        }
+
+        CaseEditorInventory.open(player, caseData);
     }
 
     @Execute(name = "reload")
