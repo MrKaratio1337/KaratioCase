@@ -15,6 +15,12 @@ import java.util.function.Consumer;
 
 public class CaseEditorInventory {
 
+    private static final int[] REWARD_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34
+    };
+
     public static void open(Player player, CaseData caseData){
         CasePlugin plugin = CasePlugin.getInstance();
 
@@ -29,7 +35,16 @@ public class CaseEditorInventory {
 
         fillBackground(inventory);
 
-        plugin.getCaseManager().getRewardManager().getValidRewards(caseData).stream().limit(21).forEach(new RewardPlacer(inventory, plugin));
+        int index = 0;
+
+        for (CaseReward reward : plugin.getCaseManager().getRewardManager().getValidRewards(caseData)) {
+            if (index >= REWARD_SLOTS.length) break;
+            if (reward == null || reward.getItem() == null || reward.getItem().getType().isAir()) continue;
+
+
+            inventory.setItem(REWARD_SLOTS[index], reward.getItem().clone());
+            index++;
+        }
 
         inventory.setItem(45, createButton(Material.LIME_WOOL, "<green>Save"));
         inventory.setItem(49, createButton(Material.RED_WOOL, "<red>Cancel"));
@@ -41,19 +56,11 @@ public class CaseEditorInventory {
     }
 
     private static void fillBackground(Inventory inventory){
-        ItemStack filler = createFiller();
-
-        for(int i = 0; i < inventory.getSize(); i++){
-            inventory.setItem(i, filler.clone());
+        for (int i = 0; i < inventory.getSize(); i++) {
+            inventory.setItem(i, createFiller());
         }
 
-        int[] slots = {
-                10, 11, 12, 13, 14, 15, 16,
-                19, 20, 21, 22, 23, 24, 25,
-                28, 29, 30, 31, 32, 33, 34
-        };
-
-        for(int slot : slots){
+        for (int slot : REWARD_SLOTS) {
             inventory.setItem(slot, null);
         }
     }
@@ -87,34 +94,5 @@ public class CaseEditorInventory {
         if(size > 54) return 54;
 
         return size;
-    }
-
-    private static class RewardPlacer implements Consumer<CaseReward> {
-        private final Inventory inventory;
-        private final CasePlugin plugin;
-
-        private int index;
-
-        private final int[] slots = {
-                10, 11, 12, 13, 14, 15, 16,
-                19, 20, 21, 22, 23, 24, 25,
-                28, 29, 30, 31, 32, 33, 34
-        };
-
-        private RewardPlacer(Inventory inventory, CasePlugin plugin){
-            this.inventory = inventory;
-            this.plugin = plugin;
-        }
-
-        @Override
-        public void accept(CaseReward reward) {
-            if(index >= slots.length) return;
-
-            if(reward == null || reward.getItem() == null || reward.getItem().getType().isAir()) return;
-
-            inventory.setItem(slots[index], reward.getItem().clone());
-
-            index ++;
-        }
     }
 }

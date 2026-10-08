@@ -16,7 +16,7 @@ public class GuiSection extends OkaeriConfig {
 
     private int animatedButtonSlot = 45;
     private int instantButtonSlot = 49;
-    private int closeButtonSlot = 49;
+    private int closeButtonSlot = 53;
 
     private String animatedButtonMaterial = "LIME_DYE";
     private String instantButtonMaterial = "GOLD_INGOT";

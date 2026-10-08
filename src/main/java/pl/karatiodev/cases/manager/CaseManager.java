@@ -32,6 +32,7 @@ public class CaseManager {
 
         for(Map.Entry<String, CaseData> entry : configuredCases.entrySet()){
             String id = normalizeId(entry.getKey());
+            if(id.isBlank()) return;
 
             CaseData data = entry.getValue();
 

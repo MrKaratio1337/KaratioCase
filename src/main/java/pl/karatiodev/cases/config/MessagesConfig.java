@@ -24,4 +24,5 @@ public class MessagesConfig extends OkaeriConfig {
     private String rewardSaved = "<green>Rewards saved.";
     private String changesCancelled = "<red>Changes cancelled.";
     private String editing = "<red>You are now in editing session";
+    private String animationDisabled = "<red>Animation disabled";
 }

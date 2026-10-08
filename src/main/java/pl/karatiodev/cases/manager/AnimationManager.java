@@ -46,21 +46,21 @@ public class AnimationManager {
     public void start(Player player, CaseData caseData, CaseReward reward){
         if(player == null || caseData == null || reward == null) return;
 
-        if(reward.getItem() == null || reward.getItem().getType().isAir()) return;
-
         if(isRunning(player)) return;
+
+        if(reward.getItem() == null || reward.getItem().getType().isAir()) return;
 
         List<CaseReward> validRewards = plugin.getCaseManager().getRewardManager().getValidRewards(caseData);
         if(validRewards.isEmpty()) return;
 
-        var animationConfig = plugin.getConfigs().getPluginConfig().getAnimation();
         var guiConfig = plugin.getConfigs().getPluginConfig().getGui();
 
+        int inventorySize = normalizeInventorySize(guiConfig.getAnimationSize());
         String title = guiConfig.getAnimationTitle().replace("%case%", caseData.getDisplayName());
 
         AnimationHolder holder = new AnimationHolder(caseData);
 
-        Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE, MessageUtility.deserialize(title));
+        Inventory inventory = Bukkit.createInventory(holder, inventorySize, MessageUtility.deserialize(title));
         holder.setInventory(inventory);
 
         fillAnimationBackground(inventory);
@@ -99,7 +99,10 @@ public class AnimationManager {
         if(session.isFinished()) return;
 
         Player player = Bukkit.getPlayer(session.getPlayerId());
-        if(player == null || !player.isOnline()) finishOffline(session);
+        if(player == null || !player.isOnline()){
+            finishOffline(session);
+            return;
+        }
 
         if(player.getOpenInventory().getTopInventory() != session.getInventory()){
             if(plugin.getConfigs().getPluginConfig().getAnimation().isCloseProtection()){
@@ -112,8 +115,7 @@ public class AnimationManager {
 
         moveAnimationItems(session);
 
-        ItemStack display = createRandomDisplayItem(session.getValidRewards());
-        session.getInventory().setItem(REWARD_END_SLOT, display);
+        session.getInventory().setItem(REWARD_END_SLOT, createRandomDisplayItem(session.getValidRewards()));
 
         session.setStep(session.getStep() + 1);
 
@@ -128,14 +130,8 @@ public class AnimationManager {
     private void moveAnimationItems(AnimationSession session){
         Inventory inventory = session.getInventory();
 
-        for(int slot = REWARD_START_SLOT; slot < REWARD_END_SLOT; slot++){
-            ItemStack next = inventory.getItem(slot + 1);
-            if(next == null){
-                inventory.setItem(slot, CaseInventoryItems.createFiller());
-                continue;
-            }
-
-            inventory.setItem(REWARD_END_SLOT, CaseInventoryItems.createFiller());
+        for (int slot = REWARD_START_SLOT; slot < REWARD_END_SLOT; slot++) {
+            inventory.setItem(slot, inventory.getItem(slot + 1));
         }
     }
 
@@ -213,7 +209,6 @@ public class AnimationManager {
 
     private void giveReward(Player player, ItemStack reward){
         if(player == null || reward == null) return;
-        ItemStack item = reward.clone();
 
         Map<Integer, ItemStack> leftovers = player.getInventory().addItem(reward);
         if(leftovers.isEmpty()) return;
@@ -223,19 +218,6 @@ public class AnimationManager {
 
             player.getWorld().dropItemNaturally(player.getLocation(), leftover);
         }
-    }
-
-    public void cancel(Player player){
-        if(player == null) return;
-
-        UUID uuid = player.getUniqueId();
-
-        AnimationSession session = sessions.remove(player.getUniqueId());
-        if(session == null) return;
-
-        session.setFinished(true);
-
-        cancelTask(session);
     }
 
     private void fillAnimationBackground(Inventory inventory){
@@ -297,10 +279,11 @@ public class AnimationManager {
     }
 
     private int normalizeInventorySize(int size){
-        if(size < INVENTORY_SIZE) return INVENTORY_SIZE;
-        if(size > 54) return 54;
+        if (size < INVENTORY_SIZE) return INVENTORY_SIZE;
+        if (size > 54) return 54;
+        if (size % 9 != 0) return ((size / 9) + 1) * 9;
 
-        return size - (size % 9) == 0 ? size : ((size / 9) + 1) * 9;
+        return size;
     }
 
     public void shutdown(){

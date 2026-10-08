@@ -14,6 +14,7 @@ import pl.karatiodev.cases.cases.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CaseItemUtility {
 
@@ -92,37 +93,47 @@ public class CaseItemUtility {
         item.setAmount(amount - 1);
     }
 
-    public static List<Component> createRewardLore(List<Component> originalLore, double chance){
-        List<Component> lore = originalLore == null ? new ArrayList<>() : new ArrayList<>(originalLore);
+    public static List<Component> createRewardLore(List<Component> lore, double chance){
+        List<Component> result = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
 
-        CasePlugin plugin = CasePlugin.getInstance();
+        var chanceConfig = CasePlugin.getInstance().getConfigs().getPluginConfig().getRewards().getChanceLore();
+        if(!chanceConfig.isEnabled()) return result;
 
-        var section = plugin.getConfigs().getPluginConfig().getRewards().getChanceLore();
-        if(!section.isEnabled()) return lore;
+        String format = chanceConfig.getFormat();
+        if(format == null || format.isBlank()){
+            format = "<gray>Chance: <yellow>%chance%%";
+        }
 
         String chanceText = formatChance(chance);
-        String formatted = section.getFormat().replace("%chance%", chanceText);
+        format = format.replace("%chance%", chanceText);
 
-        lore.add(MINI_MESSAGE.deserialize(formatted));
-        return lore;
+        result.add(MessageUtility.deserialize(format));
+        return result;
     }
 
     public static ItemStack createDisplayReward(ItemStack original, double chance){
-        if(original == null) return null;
+        if(original == null || original.getType().isAir()) return null;
 
-        ItemStack clone = original.clone();
-        ItemMeta meta = clone.getItemMeta();
-        if(meta == null) return clone;
+        ItemStack display = original.clone();
+        ItemMeta meta = display.getItemMeta();
+        if(meta == null) return display;
 
-        meta.lore(createRewardLore(meta.lore(), chance));
+        List<Component> lore = meta.lore();
+        List<Component> newLore = createRewardLore(lore, chance);
 
-        clone.setItemMeta(meta);
-        return clone;
+        meta.lore(newLore);
+        display.setItemMeta(meta);
+
+        return display;
     }
 
     public static String formatChance(double chance){
-        if(chance == Math.rint(chance)) return String.format("%.0f", chance);
+        if (!Double.isFinite(chance)) return "0";
 
-        return String.format("%.2f", chance).replaceAll("0+$", "");
+        if (chance < 0.0D) chance = 0.0D;
+        if (chance == Math.rint(chance)) return String.format(Locale.US, "%.0f", chance);
+
+
+        return String.format(Locale.US,"%.2f", chance).replaceAll("0+$", "").replaceAll("\\.$", "");
     }
 }

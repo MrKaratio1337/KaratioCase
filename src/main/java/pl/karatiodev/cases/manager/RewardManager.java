@@ -13,36 +13,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RewardManager {
 
     public CaseReward roll(CaseData caseData){
-        if(caseData == null || caseData.getRewards() != null) return null;
-
-        List<CaseReward> validRewards = new ArrayList<>();
-
-        for(CaseReward reward : caseData.getRewards()){
-            if(reward == null) continue;
-
-            ItemStack item = reward.getItem();
-            if(item == null || item.getType().isAir()) continue;
-
-            if(reward.getChance() <= 0.0D) continue;
-
-            validRewards.add(reward);
-        }
-
+        List<CaseReward> validRewards = getValidRewards(caseData);
         if(validRewards.isEmpty()) return null;
 
-        double totalWeight = validRewards.stream().mapToDouble(CaseReward::getChance).sum();
-        if(totalWeight <= 0.0D) return null;
+        double totalChance = validRewards.stream().mapToDouble(CaseReward::getChance).sum();
+        if(!Double.isFinite(totalChance) || totalChance <= 0.0D) return null;
 
-        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
-
+        double random = ThreadLocalRandom.current().nextDouble(totalChance);
         double current = 0.0D;
 
         for(CaseReward reward : validRewards){
             current += reward.getChance();
 
-            if(random < current){
-                return reward;
-            }
+            if(random < current) return reward;
         }
 
         return validRewards.get(validRewards.size() - 1);
@@ -51,12 +34,20 @@ public class RewardManager {
     public List<CaseReward> getValidRewards(CaseData caseData){
         if(caseData == null || caseData.getRewards() == null) return List.of();
 
-        return caseData.getRewards()
-                .stream()
-                .filter(reward -> reward != null)
-                .filter(reward -> reward.getItem() != null)
-                .filter(reward -> !reward.getItem().getType().isAir())
-                .filter(reward -> reward.getChance() > 0.0D)
-                .toList();
+        List<CaseReward> rewards = new ArrayList<>();
+
+        for(CaseReward reward : caseData.getRewards()){
+            if(reward == null) continue;
+
+            ItemStack item = reward.getItem();
+            if(item == null || item.getType().isAir()) continue;
+
+            double chance = reward.getChance();
+            if(!Double.isFinite(chance) && chance <= 0) continue;
+
+            rewards.add(reward);
+        }
+
+        return rewards;
     }
 }
