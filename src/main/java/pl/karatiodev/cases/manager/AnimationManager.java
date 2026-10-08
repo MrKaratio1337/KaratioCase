@@ -116,6 +116,7 @@ public class AnimationManager {
         moveAnimationItems(session);
 
         session.getInventory().setItem(REWARD_END_SLOT, createRandomDisplayItem(session.getValidRewards()));
+        playRollingSound(player);
 
         session.setStep(session.getStep() + 1);
 
@@ -148,6 +149,7 @@ public class AnimationManager {
             session.setRewarded(true);
 
             giveReward(player, reward);
+            playRewardSound(player);
         }
 
         sessions.remove(player.getUniqueId());
@@ -310,6 +312,20 @@ public class AnimationManager {
         }
 
         sessions.clear();
+    }
+
+    private void playRollingSound(Player player){
+        var sounds = plugin.getConfigs().getPluginConfig().getSounds();
+        if(!sounds.isEnabled()) return;
+
+        player.playSound(player.getLocation(), sounds.getRollingSound(), sounds.getRollingVolume(), sounds.getRollingPitch());
+    }
+
+    private void playRewardSound(Player player){
+        var sounds = plugin.getConfigs().getPluginConfig().getSounds();
+        if(!sounds.isEnabled()) return;
+
+        player.playSound(player.getLocation(), sounds.getRewardSound(), sounds.getRewardVolume(), sounds.getRewardPitch());
     }
 
     @Getter

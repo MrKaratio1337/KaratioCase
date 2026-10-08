@@ -6,7 +6,7 @@
 
     <groupId>pl.karatiodev</groupId>
     <artifactId>KaratioCase</artifactId>
-    <version>0.5-ALPHA</version>
+    <version>0.6.1-ALPHA</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

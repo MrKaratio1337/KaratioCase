@@ -12,4 +12,5 @@ public class PluginConfig extends OkaeriConfig {
     private SecuritySection security = new SecuritySection();
     private KeySection key = new KeySection();
     private RewardSection rewards = new RewardSection();
+    private SoundSection sounds = new SoundSection();
 }
