@@ -27,7 +27,7 @@ public class CaseEditorInventory {
         var config = plugin.getConfigs().getPluginConfig().getGui();
 
         int size = normalizeSize(config.getPreviewSize());
-        String title = config.getEditingTitle();
+        String title = config.getEditingTitle().replace("%case%", caseData.getDisplayName());
 
         CaseEditorHolder holder = new CaseEditorHolder(caseData);
         Inventory inventory = Bukkit.createInventory(holder, size, MessageUtility.deserialize(title));
