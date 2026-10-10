@@ -80,7 +80,7 @@ public class AnimationManager {
     private void schedule(AnimationSession session){
         var animation = plugin.getConfigs().getPluginConfig().getAnimation();
 
-        int steps = Math.max(1, animation.getSteps());
+        int steps = Math.max(5, animation.getSteps());
         long startDelay = Math.max(1L, animation.getStartDelay());
         long maxDelay = Math.max(startDelay, animation.getMaxDelay());
 
@@ -115,15 +115,20 @@ public class AnimationManager {
 
         moveAnimationItems(session);
 
-        session.getInventory().setItem(REWARD_END_SLOT, createRandomDisplayItem(session.getValidRewards()));
-        playRollingSound(player);
+        int currentStep = session.getStep();
 
-        session.setStep(session.getStep() + 1);
+        boolean insertWinner = currentStep == steps - 5;
+        if(insertWinner) session.getInventory().setItem(REWARD_END_SLOT, session.getReward().getItem().clone());
+        else session.getInventory().setItem(REWARD_END_SLOT, createRandomDisplayItem(session.getValidRewards()));
 
-        if(session.getStep() >= steps){
+        session.setStep(currentStep + 1);
+        boolean lastStep = session.getStep() >= steps;
+        if(lastStep){
             finish(session, player);
             return;
         }
+
+        playRollingSound(player);
 
         scheduleNextStep(session, steps, startDelay, maxDelay);
     }
@@ -142,8 +147,11 @@ public class AnimationManager {
 
         cancelTask(session);
 
-        ItemStack reward = session.getReward().getItem().clone();
-        session.getInventory().setItem(WINNER_SLOT, reward.clone());
+        ItemStack reward = session.getReward().getItem();
+        if(reward == null || reward.getType().isAir()){
+            sessions.remove(player.getUniqueId());
+            return;
+        }
 
         if(!session.isRewarded()){
             session.setRewarded(true);
@@ -155,7 +163,9 @@ public class AnimationManager {
         sessions.remove(player.getUniqueId());
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-           if(player.isOnline() && player.getOpenInventory().getTopInventory() == session.getInventory()){
+            if(!player.isOnline()) return;
+
+           if(player.getOpenInventory().getTopInventory() == session.getInventory()){
                player.closeInventory();
            }
         }, 40);

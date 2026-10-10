@@ -252,6 +252,8 @@ public class CaseInventoryListener implements Listener {
 
             if(!plugin.getAnimationManager().isRunning(player)) return;
 
+            if(player.getOpenInventory().getTopInventory().getHolder() instanceof AnimationHolder) return;
+
             plugin.getAnimationManager().reopen(player);
         });
     }
