@@ -1,5 +1,5 @@
 main: pl.karatiodev.cases.CasePlugin
 name: KaratioCase
-version: 0.6.3-ALPHA
+version: 1.0-BETA-1
 author: MrKaratio1337
 api-version: 1.13
