@@ -1,6 +1,7 @@
 package pl.karatiodev.cases.utilities;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -107,7 +108,7 @@ public class CaseItemUtility {
         String chanceText = formatChance(chance);
         format = format.replace("%chance%", chanceText);
 
-        result.add(MessageUtility.deserialize(format));
+        result.add(MessageUtility.deserialize(format).decoration(TextDecoration.ITALIC, false));
         return result;
     }
 

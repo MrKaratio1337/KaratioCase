@@ -1,5 +1,6 @@
 package pl.karatiodev.cases.inventories;
 
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +15,7 @@ public final class CaseInventoryItems {
         ItemMeta meta = item.getItemMeta();
         if(meta == null) return item;
 
-        meta.displayName(MINI_MESSAGE.deserialize(name));
+        meta.displayName(MINI_MESSAGE.deserialize(name).decoration(TextDecoration.ITALIC, false));
 
         item.setItemMeta(meta);
         return item;
@@ -24,7 +25,7 @@ public final class CaseInventoryItems {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
         if(meta != null){
-            meta.displayName(MINI_MESSAGE.deserialize("<gray>"));
+            meta.displayName(MINI_MESSAGE.deserialize("<gray>").decoration(TextDecoration.ITALIC, false));
 
             item.setItemMeta(meta);
         }
