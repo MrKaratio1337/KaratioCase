@@ -17,6 +17,7 @@ public class MessagesConfig extends OkaeriConfig {
     private String outOfBound = "<red>Amount must be in 1 to 2304";
     private String cantCreateKey = "<red>Failed to create the key.";
     private String keyGived = "<green>Transferred <yellow>%amount%</yellow> for keys <yellow>%id%</yellow> to <yellow>%player%</yellow>";
+    private String keyAllGived = "<green>Transferred <yellow>%amount%</yellow> for keys <yellow>%id%</yellow> to all players";
     private String configReload = "<green>Configuration reloaded.";
     private String animationRunning = "<red>Animation is running";
     private String caseEmpty = "<red>That case is empty";
@@ -26,4 +27,5 @@ public class MessagesConfig extends OkaeriConfig {
     private String editing = "<red>You are now in editing session";
     private String animationDisabled = "<red>Animation disabled";
     private String handEmpty = "<red>Your hand cant be empty.";
+    private String playerOffline = "<red>Player with name <yellow>%player%</yellow> is offline.";
 }

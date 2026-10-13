@@ -6,6 +6,7 @@ import dev.rollczi.litecommands.annotations.context.Sender;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -129,12 +130,22 @@ public class CaseCommand {
             return;
         }
 
-        giveKey(player, player, id, 1);
+        giveKeyToTarget(sender, player, id, 1);
     }
 
     @Execute(name = "givekey")
-    public void giveKey(@Sender Player sender, @Arg String id, @Arg int amount){
-        giveKey(sender, sender, id, amount);
+    public void giveKeyAmount(@Sender Player sender, @Arg String id, @Arg int amount){
+        giveKeyToTarget(sender, sender, id, amount);
+    }
+
+    @Execute(name = "givekey")
+    public void giveKeyToPlayer(@Sender CommandSender sender, @Arg String id, @Arg String targetName){
+        giveKeyTarget(sender, id, targetName, 1);
+    }
+
+    @Execute(name = "givekey")
+    public void giveKeyToPlayerAmount(@Sender CommandSender sender, @Arg String id, @Arg String targetName, @Arg int amount){
+        giveKeyTarget(sender, id, targetName, amount);
     }
 
     @Execute(name = "edit")
@@ -166,10 +177,39 @@ public class CaseCommand {
         sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getConfigReload()));
     }
 
-    private void giveKey(CommandSender sender, Player target, String id, int amount){
+    private void giveKeyTarget(CommandSender sender, String id, String targetName, int amount){
+        if(amount < 1 || amount > 2304){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getOutOfBound()));
+            return;
+        }
+
+        if(targetName.equalsIgnoreCase("all")){
+            if(Bukkit.getOnlinePlayers().isEmpty()){
+                sender.sendMessage(MessageUtility.deserialize("<red>No players at server :("));
+                return;
+            }
+
+            for(Player target : Bukkit.getOnlinePlayers()){
+                giveKeyToTarget(sender, target, id, amount);
+            }
+
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getKeyAllGived().replace("%id%", id).replace("%amount%", String.valueOf(amount))));
+            return;
+        }
+
+        Player target = Bukkit.getPlayerExact(targetName);
+        if(target == null){
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getPlayerOffline().replace("%player%", targetName)));
+            return;
+        }
+
+        giveKeyToTarget(sender, target, id, amount);
+    }
+
+    private void giveKeyToTarget(CommandSender sender, Player target, String id, int amount){
         CaseData caseData = plugin.getCaseManager().get(id);
         if(caseData == null){
-            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseNotFound()));
+            sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseNotFound().replace("%id%", id)));
             return;
         }
 
@@ -185,7 +225,11 @@ public class CaseCommand {
         }
 
         giveItems(target, key, amount);
-        sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getKeyGived().replace("%amount%", String.valueOf(amount)).replace("%id%", id).replace("%player%", target.getName())));
+
+        sender.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getKeyGived()
+                .replace("%amount%", String.valueOf(amount))
+                .replace("%id%", id)
+                .replace("%player%", target.getName())));
     }
 
     private void giveItems(Player player, ItemStack item, int amount){
