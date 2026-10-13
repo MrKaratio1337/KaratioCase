@@ -45,15 +45,22 @@ public class CaseCommand {
             return;
         }
 
-        CaseData caseData = plugin.getCaseManager().create(id, name,
-                player.getTargetBlockExact(10) != null ? player.getTargetBlockExact(10).getType() : Material.ENDER_CHEST, player.getLocation());
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+        if(heldItem.getType().isAir()){
+            player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getHandEmpty()));
+            return;
+        }
+
+        Material blockType = heldItem.getType();
+
+        CaseData caseData = plugin.getCaseManager().create(id, name, blockType, player.getLocation());
 
         if(caseData == null){
             player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getErrorCreate()));
             return;
         }
 
-        player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseCreated().replace("%id%", caseData.getId())));
+        player.sendMessage(MessageUtility.deserialize(plugin.getConfigs().getMessagesConfig().getCaseCreated().replace("%id%", caseData.getId()).replace("%type%", blockType.name())));
     }
 
     @Execute(name = "delete")

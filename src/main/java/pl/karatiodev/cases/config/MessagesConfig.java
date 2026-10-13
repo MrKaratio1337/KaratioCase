@@ -8,7 +8,7 @@ public class MessagesConfig extends OkaeriConfig {
 
     private String caseExist = "<red>Case with ID <yellow>%id%</yellow> exists";
     private String errorCreate = "<red>Failed to create case.";
-    private String caseCreated = "<green>Case created with ID <yellow>%id%";
+    private String caseCreated = "<green>Case created with ID <yellow>%id%</yellow>. Block: <yellow>%type%";
     private String caseNotFound = "<red>Case with ID <yellow>%id%</yellow> not found.";
     private String caseDeleted = "<green>Case with ID <yellow>%id%</yellow> deleted.";
     private String positionCantChanged = "<red>Failed to change the case position.";
@@ -25,4 +25,5 @@ public class MessagesConfig extends OkaeriConfig {
     private String changesCancelled = "<red>Changes cancelled.";
     private String editing = "<red>You are now in editing session";
     private String animationDisabled = "<red>Animation disabled";
+    private String handEmpty = "<red>Your hand cant be empty.";
 }
